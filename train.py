@@ -36,7 +36,7 @@ random.seed(seed)
 np.random.seed(seed)
 torch.manual_seed(seed)
 torch.cuda.manual_seed_all(seed)
-gpu_list = [0]
+gpu_list = [0,1,2,3,4,5,6,7]
 
 try:
     # Create checkpoint directory if it does not exist
@@ -127,8 +127,8 @@ print('INFO: Testing on {} frames'.format(len(dataset_test)))
 
 if not args.evaluate:
     ## train
-    trainDataLoader = DataLoader(dataset_train, batch_size=args.batch_size * len(gpu_list),shuffle=True,num_workers=6,pin_memory=True)
-    testDataLoader = DataLoader(dataset_test, batch_size=args.batch_size * len(gpu_list),shuffle=False,pin_memory=True)
+    trainDataLoader = DataLoader(dataset_train, batch_size=args.batch_size * len(gpu_list),shuffle=True,num_workers=8,pin_memory=True)
+    testDataLoader = DataLoader(dataset_test, batch_size=args.batch_size * len(gpu_list),shuffle=False,num_workers=8,pin_memory=True)
     lr = args.learning_rate
     optimizer = optim.Adam(model_pos.parameters(), lr=lr, amsgrad=True)
     lr_decay = args.lr_decay
@@ -179,8 +179,6 @@ if not args.evaluate:
             loss_total.backward()
 
             optimizer.step()
-            if N > 10000:
-                break
 
         losses_3d_train.append(epoch_loss_3d_train / N)
 
@@ -216,6 +214,7 @@ if not args.evaluate:
                 epoch_loss_2d_train_labeled_eval = 0
                 N = 0
                 for label,_, inputs_3d, inputs_2d in tqdm(trainDataLoader):
+                    inputs_3d = inputs_3d.cuda(non_blocking=True)
                     if inputs_2d.shape[1] == 0:
                         # This can only happen when downsampling the dataset
                         continue
@@ -273,7 +272,7 @@ if not args.evaluate:
 
         # Decay BatchNorm momentum
         momentum = initial_momentum * np.exp(-epoch / args.epochs * np.log(initial_momentum / final_momentum))
-        model_pos.set_bn_momentum(momentum)
+        model_pos.module.set_bn_momentum(momentum)
 
         # Save checkpoint if necessary
         if epoch % args.checkpoint_frequency == 0:
