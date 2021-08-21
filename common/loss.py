@@ -8,13 +8,21 @@
 import torch
 import numpy as np
 
-def mpjpe(predicted, target):
+def mpjpe_loss(predicted, target):
     """
     Mean per-joint position error (i.e. mean Euclidean distance),
     often referred to as "Protocol #1" in many papers.
     """
     assert predicted.shape == target.shape
     return torch.mean(torch.norm(predicted - target, dim=len(target.shape)-1))
+
+def mpjpe(predicted, target):
+    """
+    Mean per-joint position error (i.e. mean Euclidean distance),
+    often referred to as "Protocol #1" in many papers.
+    """
+    assert predicted.shape == target.shape
+    return torch.mean(torch.norm(predicted - target, dim=len(target.shape)-1),dim = 2).detach().cpu().numpy().flatten()
 
 
 def mse(predicted, target):
@@ -88,7 +96,7 @@ def p_mpjpe(predicted, target):
     predicted_aligned = a*np.matmul(predicted, R) + t
     
     # Return MPJPE
-    return np.mean(np.linalg.norm(predicted_aligned - target, axis=len(target.shape)-1))
+    return np.mean(np.linalg.norm(predicted_aligned - target, axis=len(target.shape)-1),axis=1).flatten()
     
 def n_mpjpe(predicted, target):
     """

@@ -700,7 +700,7 @@ else:
                     continue
 
             poses_act, poses_2d_act = fetch_actions(actions[action_key])
-            gen = Evaluate_Generator(1, None, poses_act, poses_2d_act, args.stride,
+            gen = Evaluate_Generator(500, None, poses_act, poses_2d_act, args.stride,
                                      pad=pad, causal_shift=causal_shift, augment=args.test_time_augmentation,
                                      shuffle=False,
                                      kps_left=kps_left, kps_right=kps_right, joints_left=joints_left,

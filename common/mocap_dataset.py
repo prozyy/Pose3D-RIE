@@ -7,28 +7,29 @@
 
 import numpy as np
 from common.skeleton import Skeleton
+from torch.utils.data import Dataset
 
-class MocapDataset:
+class MocapDataset(Dataset):
     def __init__(self, fps, skeleton):
         self._skeleton = skeleton
         self._fps = fps
-        self._data = None # Must be filled by subclass
+        self._data_3d = None # Must be filled by subclass
+        self._data_2d = None # Must be filled by subclass
         self._cameras = None # Must be filled by subclass
+        self._pairs = []
+        self.kept_joints = None
     
     def remove_joints(self, joints_to_remove):
-        kept_joints = self._skeleton.remove_joints(joints_to_remove)
-        for subject in self._data.keys():
-            for action in self._data[subject].keys():
-                s = self._data[subject][action]
-                if 'positions' in s:
-                    s['positions'] = s['positions'][:, kept_joints]
+        self.kept_joints = self._skeleton.remove_joints(joints_to_remove)
                 
-        
-    def __getitem__(self, key):
-        return self._data[key]
+    def __getitem__(self, index):
+        return self.getDataFromPair(index)
+
+    def __len__(self):
+        return len(self._pairs)
         
     def subjects(self):
-        return self._data.keys()
+        return self._data_3d.keys()
     
     def fps(self):
         return self._fps
@@ -42,3 +43,6 @@ class MocapDataset:
     def supports_semi_supervised(self):
         # This method can be overridden
         return False
+
+    def getDataFromPair(self,index):
+        return None

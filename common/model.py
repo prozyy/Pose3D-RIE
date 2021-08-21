@@ -208,7 +208,7 @@ class RIEModel(nn.Module):
         self.stage = stage
 
         self.LocalLayer_Torso = TemporalBlock(5 * 3, in_features, num_joints_out, filter_widths, causal, dropout,
-                                              channels, self.latten_features, dense, is_train, Optimize1f)
+                                              channels, self.latten_features, dense, is_train, Optimize1f) #(15,2,17,[3,3,3,3],False,0.2,256,256,False,False,True)
         self.LocalLayer_LArm = TemporalBlock(3 * 3, in_features, num_joints_out, filter_widths, causal, dropout,
                                              channels, self.latten_features, dense, is_train, Optimize1f)
         self.LocalLayer_RArm = TemporalBlock(3 * 3, in_features, num_joints_out, filter_widths, causal, dropout,
@@ -274,11 +274,11 @@ class RIEModel(nn.Module):
         pad = (self.receptive_field() - 1) // 2
         in_current = x[:, x.shape[1] // 2:x.shape[1] // 2 + 1]
 
-        in_current = in_current.reshape(in_current.shape[0] * in_current.shape[1], -1)
+        in_current = in_current.reshape(in_current.shape[0] * in_current.shape[1], -1) # [500,34]
 
         x_sz = x.shape
         x = x.view(x.shape[0], x.shape[1], -1)
-        x = x.permute(0, 2, 1)
+        x = x.permute(0, 2, 1)   # [500,34,243]
 
         sz = x.shape
 
@@ -289,13 +289,11 @@ class RIEModel(nn.Module):
         diff_t = x - x[:, :, x.shape[2] // 2:x.shape[2] // 2 + 1].expand(sz[0], sz[1], sz[2])
 
         # Grouping
-        in_Torso = torch.cat(
-            (x[:, 0:2, :], x[:, 14:22, :], diff[:, 0:2, :], diff[:, 14:22, :], diff_t[:, 0:2, :], diff_t[:, 14:22, :]),
-            dim=1)
-        in_LArm = torch.cat((x[:, 28:34, :], diff[:, 28:34, :], diff_t[:, 28:34, :]), dim=1)
-        in_RArm = torch.cat((x[:, 22:28, :], diff[:, 22:28, :], diff_t[:, 22:28, :]), dim=1)
-        in_LLeg = torch.cat((x[:, 2:8, :], diff[:, 2:8, :], diff_t[:, 2:8, :]), dim=1)
-        in_RLeg = torch.cat((x[:, 8:14, :], diff[:, 8:14, :], diff_t[:, 8:14, :]), dim=1)
+        in_Torso = torch.cat((x[:, 0:2, :], x[:, 14:22, :], diff[:, 0:2, :], diff[:, 14:22, :], diff_t[:, 0:2, :], diff_t[:, 14:22, :]),dim=1) #[500,30,243]
+        in_LArm = torch.cat((x[:, 28:34, :], diff[:, 28:34, :], diff_t[:, 28:34, :]), dim=1) #[500,18,243]
+        in_RArm = torch.cat((x[:, 22:28, :], diff[:, 22:28, :], diff_t[:, 22:28, :]), dim=1) #[500,18,243]
+        in_LLeg = torch.cat((x[:, 2:8, :], diff[:, 2:8, :], diff_t[:, 2:8, :]), dim=1)       #[500,18,243]
+        in_RLeg = torch.cat((x[:, 8:14, :], diff[:, 8:14, :], diff_t[:, 8:14, :]), dim=1)    #[500,18,243]
 
         # Global Feature Encoder
         x_global = self.GlobalInfo(in_current)
