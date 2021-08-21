@@ -334,9 +334,9 @@ class Human36mDataset(MocapDataset):
         pad_left_2d = low_2d - start_2d
         pad_right_2d = end_2d - high_2d
         if pad_left_2d != 0 or pad_right_2d != 0:
-            group_2d = np.pad(seq_2d[low_2d:high_2d], ((pad_left_2d, pad_right_2d), (0, 0), (0, 0)), 'edge')
+            group_2d = np.pad(copy.deepcopy(seq_2d[low_2d:high_2d]), ((pad_left_2d, pad_right_2d), (0, 0), (0, 0)), 'edge')
         else:
-            group_2d = seq_2d[low_2d:high_2d]
+            group_2d = copy.deepcopy(seq_2d[low_2d:high_2d])
 
         if flip:
             # Flip 2D keypoints
@@ -350,9 +350,9 @@ class Human36mDataset(MocapDataset):
         pad_left_3d = low_3d - start_3d
         pad_right_3d = end_3d - high_3d
         if pad_left_3d != 0 or pad_right_3d != 0:
-            group_3d = np.pad(seq_3d[low_3d:high_3d], ((pad_left_3d, pad_right_3d), (0, 0), (0, 0)), 'edge')
+            group_3d = np.pad(copy.deepcopy(seq_3d[low_3d:high_3d]), ((pad_left_3d, pad_right_3d), (0, 0), (0, 0)), 'edge')
         else:
-            group_3d = seq_3d[low_3d:high_3d]
+            group_3d = copy.deepcopy(seq_3d[low_3d:high_3d])
 
         if flip:
             # Flip 3D joints
