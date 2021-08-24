@@ -11,10 +11,9 @@ from common.skeleton import Skeleton
 from common.mocap_dataset import MocapDataset
 from common.camera import normalize_screen_coordinates, image_coordinates, world_to_camera
 
-h36m_skeleton = Skeleton(
-    parents=[-1, 0, 1, 2, 3, 4, 0, 6, 7, 8, 9, 0, 11, 12, 13, 14, 12, 16, 17, 18, 19, 20, 19, 22, 12, 24, 25, 26, 27, 28, 27, 30],
-    joints_left=[6, 7, 8, 9, 10, 16, 17, 18, 19, 20, 21, 22, 23],
-    joints_right=[1, 2, 3, 4, 5, 24, 25, 26, 27, 28, 29, 30, 31])
+h36m_skeleton = Skeleton(parents=[-1,  0,  0,  1,  2,  6,  5,  5,  6,  7,  8,  5, 6, 11, 12, 13, 14, 15, 16, 15, 16, 0, 9, 10],
+       joints_left=[1,3,5,7,9,11,13,15,17,19,22],
+       joints_right=[2,4,6,8,10,12,14,16,18,20,23])
 
 h36m_cameras_intrinsic_params = [
     {
@@ -59,6 +58,69 @@ h36m_cameras_intrinsic_params = [
     },
 ]
 
+h36m_goProCameras_intrinsic_params = [
+    {
+        'id': '1',
+        'center': [956.6417236328125,526.0769653320312],
+        'focal_length': [1579.549560546875,1580.794921875],
+        'radial_distortion': [-0.14646318554878235,0.13881948590278625,-0.07125651836395264],     ## k1 k2 k3
+        'tangential_distortion': [-0.0009389497572556138,-2.3357843019766733e-05], ## p1 p2
+        'res_w': 1920,
+        'res_h': 1080,
+        'azimuth': 0, # Only used for visualization
+    },
+    {
+        'id': '2',
+        'center': [959.6974487304688,545.5534057617188],
+        'focal_length': [1590.145263671875,1589.552734375],
+        'radial_distortion': [-0.1452776938676834,0.13771952688694,-0.06734155863523483], ## k1 k2 k3
+        'tangential_distortion': [-0.0008101108833216131,0.00038700600271113217], ## p1 p2
+        'res_w': 1920,
+        'res_h': 1080,
+        'azimuth': 0, # Only used for visualization
+    },
+    {
+        'id': '3',
+        'center': [945.036376953125,544.3353271484375],
+        'focal_length': [1588.7041015625,1587.5155029296875],
+        'radial_distortion': [-0.13589085638523102,0.10075731575489044,-0.015615474432706833],     ## k1 k2 k3
+        'tangential_distortion': [-0.0011635348200798035,-0.0009321411489509046], ## p1 p2
+        'res_w': 1920,
+        'res_h': 1080,
+        'azimuth': 0, # Only used for visualization
+    },
+    {
+        'id': '4',
+        'center': [945.07275390625,553.9684448242188],
+        'focal_length': [1590.0548095703125,1590.5556640625],
+        'radial_distortion': [-0.13788962364196777,0.10029269009828568,-0.014170068316161633],     ## k1 k2 k3
+        'tangential_distortion': [-0.0008639143197797239,-0.0013395894784480333], ## p1 p2
+        'res_w': 1920,
+        'res_h': 1080,
+        'azimuth': 0, # Only used for visualization
+    },
+    {
+        'id': '5',
+        'center': [958.4230346679688,547.2905883789062],
+        'focal_length': [1590.8802490234375,1590.1357421875],
+        'radial_distortion': [-0.14894536137580872,0.1595952957868576,-0.10301978141069412],     ## k1 k2 k3
+        'tangential_distortion': [-0.0006442437297664583,7.107679994078353e-05,], ## p1 p2
+        'res_w': 1920,
+        'res_h': 1080,
+        'azimuth': 0, # Only used for visualization
+    },
+    {
+        'id': '6',
+        'center': [957.1611938476562,560.1165771484375],
+        'focal_length': [1592.3768310546875,1591.3646240234375],
+        'radial_distortion': [-0.1426018476486206,0.12450122088193893,-0.032923612743616104],     ## k1 k2 k3
+        'tangential_distortion': [-0.000379784032702446,-0.0004391535185277462], ## p1 p2
+        'res_w': 1920,
+        'res_h': 1080,
+        'azimuth': 0, # Only used for visualization
+    }
+]
+
 h36m_cameras_extrinsic_params = {
     'S1': [
         {
@@ -79,10 +141,30 @@ h36m_cameras_extrinsic_params = {
         },
     ],
     'S2': [
-        {},
-        {},
-        {},
-        {},
+        {
+            'orientation': [0.7214346772808389, 0.5594938250505211, 0.2669336309336537, 0.30861805330149544],
+            'translation': [-2576.6845703125, 2967.963134765625, -1642.8984375],
+        },
+        {
+            'orientation': [-0.41221846188522615, -0.3176995114936784, -0.5228560724698434, -0.675103316210983],
+            'translation': [-2950.165771484375, -1363.7650146484375, -1500.605224609375],
+        },
+        {
+            'orientation': [0.667356265136803, 0.5323901896765427, -0.3143188082645252, -0.4152107754984217],
+            'translation': [4275.3818359375, 2391.6259765625, -1626.4405517578125],
+        },
+        {
+            'orientation': [0.792664258130462, 0.6093196078287898, -0.002031477453301868, -0.02022034859271058],
+            'translation': [575.7633056640625, 4155.89599609375, -1636.170654296875],
+        },
+        {
+            'orientation': [0.3228321571449658, 0.28061021797282065, -0.5607030876914877, -0.7089776804213276],
+            'translation': [4303.7021484375, -2368.0400390625, -1624.0472412109375],
+        },
+        {
+            'orientation': [-0.024755272009995985, -0.02000983248580507, -0.6137013188067142, -0.7888963648075079],
+            'translation': [221.23043823242188, -4081.730712890625, -1636.85107421875],
+        }
     ],
     'S3': [
         {},
@@ -215,13 +297,16 @@ class Human36mDataset(MocapDataset):
         self.pad = pad
         self.causal_shift = causal_shift
         self.is_train = is_train
-        self.train_subjects = ["S1", "S5", "S6", "S7", "S8"]
+        self.train_subjects = ["S1", "S2", "S5", "S6", "S7", "S8"]
         self.test_subjects = ["S9", "S11"]
 
         self._cameras = copy.deepcopy(h36m_cameras_extrinsic_params)
-        for cameras in self._cameras.values():
+        for sub,cameras in self._cameras.items():
             for i, cam in enumerate(cameras):
-                cam.update(h36m_cameras_intrinsic_params[i])
+                if sub == "S2":
+                    cam.update(h36m_goProCameras_intrinsic_params[i])
+                else:
+                    cam.update(h36m_cameras_intrinsic_params[i])
                 for k, v in cam.items():
                     if k not in ['id', 'res_w', 'res_h']:
                         cam[k] = np.array(v, dtype='float32')
@@ -238,13 +323,13 @@ class Human36mDataset(MocapDataset):
         # Load serialized dataset
         self._data_3d = np.load(path3d, allow_pickle=True)['positions_3d'].item()
 
-        if remove_static_joints:
-            # Bring the skeleton to 17 joints instead of the original 32
-            self.remove_joints([4, 5, 9, 10, 11, 16, 20, 21, 22, 23, 24, 28, 29, 30, 31])
+        # if remove_static_joints:
+        #     # Bring the skeleton to 17 joints instead of the original 32
+        #     self.remove_joints([4, 5, 9, 10, 11, 16, 20, 21, 22, 23, 24, 28, 29, 30, 31])
 
-            # Rewire shoulders to the correct parents
-            self._skeleton._parents[11] = 8
-            self._skeleton._parents[14] = 8
+        #     # Rewire shoulders to the correct parents
+        #     self._skeleton._parents[11] = 8
+        #     self._skeleton._parents[14] = 8
 
         data2d_file = np.load(path2d, allow_pickle=True)
         self._data_2d = data2d_file['positions_2d'].item()
@@ -272,7 +357,10 @@ class Human36mDataset(MocapDataset):
                 positions_3d = []
                 for cam in self._cameras[subject]:
                     pos_3d = world_to_camera(positions, R=cam['orientation'], t=cam['translation'])
-                    pos_3d[:, 1:] -= pos_3d[:, :1]  # Remove global offset, but keep trajectory in first position
+                    # pos_3d[:, 1:] -= pos_3d[:, :1]  # Remove global offset, but keep trajectory in first position
+                    if len(pos_3d.shape) == 4:
+                        pos_3d = pos_3d.reshape(pos_3d.shape[0] * pos_3d.shape[1],pos_3d.shape[2],pos_3d.shape[3])
+                    pos_3d[:, :] = np.mean(pos_3d[:, 11:13],axis = 1,keepdims=True)  # Remove global offset, but keep trajectory in first position
                     positions_3d.append(pos_3d)
                 self._data_3d[subject][action_name] = {'positions': positions, 'cameras': self._cameras[subject], 'positions_3d': positions_3d}
 
@@ -365,7 +453,5 @@ class Human36mDataset(MocapDataset):
             # Flip horizontal distortion coefficients
             group_cam[2] *= -1
             group_cam[7] *= -1
-
-        group_3d[:,0,:] = 0
 
         return subject_action_camIndex, group_cam, group_3d, group_2d

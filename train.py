@@ -6,7 +6,6 @@
 #
 
 import numpy as np
-
 from common.arguments import parse_args
 import torch
 import random
@@ -20,7 +19,7 @@ import sys
 import errno
 
 from common.camera import *
-from common.model import *
+from common.model import get_model
 from common.loss import *
 from common.generators import ChunkedGenerator, Evaluate_Generator
 from time import time
@@ -36,7 +35,7 @@ random.seed(seed)
 np.random.seed(seed)
 torch.manual_seed(seed)
 torch.cuda.manual_seed_all(seed)
-gpu_list = [0,1,2,3,4,5,6,7]
+gpu_list = [0]
 
 try:
     # Create checkpoint directory if it does not exist
@@ -46,21 +45,18 @@ except OSError as e:
         raise RuntimeError('Unable to create checkpoint directory:', args.checkpoint)
 
 filter_widths = [int(x) for x in args.architecture.split(',')]
-num_joints_in = 17
-in_features = 2
-num_joints_out = 17
 
 if not args.disable_optimizations and not args.dense and args.stride == 1:
     # Use optimized model for single-frame predictions
-    model_pos = RIEModel(num_joints_in, in_features,
-                               num_joints_out,
+    model_pos = get_model(args.dataset)(args.num_joints_in, args.in_features,
+                               args.num_joints_out,
                                filter_widths=filter_widths, causal=args.causal, dropout=args.dropout,
                                channels=args.channels, latten_features=args.latent_features_dim,
                                dense=args.dense, is_train=True, Optimize1f=True, stage=args.stage)
 else:
     # When incompatible settings are detected (stride > 1, dense filters, or disabled optimization) fall back to normal model
-    model_pos = RIEModel(num_joints_in, in_features,
-                               num_joints_out,
+    model_pos = get_model(args.dataset)(args.num_joints_in, args.in_features,
+                               args.num_joints_out,
                                filter_widths=filter_widths, causal=args.causal, dropout=args.dropout,
                                channels=args.channels,
                                latten_features=args.latent_features_dim, dense=args.dense, is_train=True,
@@ -87,11 +83,14 @@ if args.dataset == 'h36m':
     from common.h36m_dataset import Human36mDataset
     dataset_train = Human36mDataset(dataset3d_path,dataset2d_path,chunk_length=args.stride,augment=args.data_augmentation,pad=pad,causal_shift=causal_shift,is_train=True)
     dataset_test = Human36mDataset(dataset3d_path,dataset2d_path,chunk_length=args.stride,augment=False,pad=pad,causal_shift=causal_shift,is_train=False)
+elif args.dataset == 'h36m_24':
+    from common.h36m_dataset_24 import Human36mDataset
+    dataset_train = Human36mDataset(dataset3d_path,dataset2d_path,chunk_length=args.stride,augment=args.data_augmentation,pad=pad,causal_shift=causal_shift,is_train=True)
+    dataset_test = Human36mDataset(dataset3d_path,dataset2d_path,chunk_length=args.stride,augment=False,pad=pad,causal_shift=causal_shift,is_train=False)
 else:
     raise KeyError('Invalid dataset')
 
 if torch.cuda.is_available():
-    # model_pos = model_pos.cuda()
     model_pos = torch.nn.DataParallel(model_pos, device_ids=gpu_list).cuda()
 
 if args.pretrain:
@@ -127,8 +126,8 @@ print('INFO: Testing on {} frames'.format(len(dataset_test)))
 
 if not args.evaluate:
     ## train
-    trainDataLoader = DataLoader(dataset_train, batch_size=args.batch_size * len(gpu_list),shuffle=True,num_workers=8,pin_memory=True)
-    testDataLoader = DataLoader(dataset_test, batch_size=args.batch_size * len(gpu_list),shuffle=False,num_workers=8,pin_memory=True)
+    trainDataLoader = DataLoader(dataset_train, batch_size=args.batch_size * len(gpu_list),shuffle=True,num_workers=4,pin_memory=True)
+    testDataLoader = DataLoader(dataset_test, batch_size=args.batch_size * len(gpu_list),shuffle=False,num_workers=4,pin_memory=True)
     lr = args.learning_rate
     optimizer = optim.Adam(model_pos.parameters(), lr=lr, amsgrad=True)
     lr_decay = args.lr_decay
@@ -165,10 +164,7 @@ if not args.evaluate:
         for label,_, inputs_3d, inputs_2d in tqdm(trainDataLoader):
             inputs_3d = inputs_3d.cuda(non_blocking=True)
 
-            inputs_3d[:, :, 0] = 0
-
             optimizer.zero_grad()
-
             # Predict 3D poses
             predicted_3d_pos = model_pos(inputs_2d)
             loss_3d_pos = mpjpe_loss(predicted_3d_pos, inputs_3d)
@@ -198,7 +194,6 @@ if not args.evaluate:
                 for label,_, inputs_3d, inputs_2d in tqdm(testDataLoader):
                     inputs_3d = inputs_3d.cuda(non_blocking=True)
                     inputs_traj = inputs_3d[:, :, :1].clone()
-                    inputs_3d[:, :, 0] = 0
 
                     # Predict 3D poses
                     predicted_3d_pos = model_pos(inputs_2d)
@@ -218,11 +213,7 @@ if not args.evaluate:
                     if inputs_2d.shape[1] == 0:
                         # This can only happen when downsampling the dataset
                         continue
-                    # if torch.cuda.is_available():
-                    #     inputs_3d = inputs_3d.cuda()
-                    #     inputs_2d = inputs_2d.cuda()
                     inputs_traj = inputs_3d[:, :, :1].clone()
-                    inputs_3d[:, :, 0] = 0
 
                     # Compute 3D poses
                     predicted_3d_pos = model_pos(inputs_2d)
@@ -351,7 +342,6 @@ def evaluate(test_dataloader, return_predictions=False):
 
                 if torch.cuda.is_available():
                     inputs_3d = inputs_3d.cuda()
-                inputs_3d[:, :, 0] = 0
                 error = mpjpe(predicted_3d_pos, inputs_3d)
 
                 # epoch_loss_3d_pos += inputs_3d.shape[0] * inputs_3d.shape[1] * error.item()
@@ -381,7 +371,6 @@ def evaluate(test_dataloader, return_predictions=False):
                     
                 if torch.cuda.is_available():
                     inputs_3d = inputs_3d.cuda()
-                inputs_3d[:, :, 0] = 0
 
                 error = mpjpe(predicted_3d_pos, inputs_3d)
 
