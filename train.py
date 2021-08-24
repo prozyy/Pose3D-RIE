@@ -35,7 +35,7 @@ random.seed(seed)
 np.random.seed(seed)
 torch.manual_seed(seed)
 torch.cuda.manual_seed_all(seed)
-gpu_list = [0]
+gpu_list = [0,1,2,3,4,5,6,7]
 
 try:
     # Create checkpoint directory if it does not exist
@@ -126,8 +126,8 @@ print('INFO: Testing on {} frames'.format(len(dataset_test)))
 
 if not args.evaluate:
     ## train
-    trainDataLoader = DataLoader(dataset_train, batch_size=args.batch_size * len(gpu_list),shuffle=True,num_workers=4,pin_memory=True)
-    testDataLoader = DataLoader(dataset_test, batch_size=args.batch_size * len(gpu_list),shuffle=False,num_workers=4,pin_memory=True)
+    trainDataLoader = DataLoader(dataset_train, batch_size=args.batch_size * len(gpu_list),shuffle=True,num_workers=8,pin_memory=True)
+    testDataLoader = DataLoader(dataset_test, batch_size=args.batch_size * len(gpu_list),shuffle=False,num_workers=8,pin_memory=True)
     lr = args.learning_rate
     optimizer = optim.Adam(model_pos.parameters(), lr=lr, amsgrad=True)
     lr_decay = args.lr_decay

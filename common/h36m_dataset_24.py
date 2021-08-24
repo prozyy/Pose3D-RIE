@@ -360,7 +360,7 @@ class Human36mDataset(MocapDataset):
                     # pos_3d[:, 1:] -= pos_3d[:, :1]  # Remove global offset, but keep trajectory in first position
                     if len(pos_3d.shape) == 4:
                         pos_3d = pos_3d.reshape(pos_3d.shape[0] * pos_3d.shape[1],pos_3d.shape[2],pos_3d.shape[3])
-                    pos_3d[:, :] = np.mean(pos_3d[:, 11:13],axis = 1,keepdims=True)  # Remove global offset, but keep trajectory in first position
+                    pos_3d[:, :] -= np.mean(pos_3d[:, 11:13],axis = 1,keepdims=True)  # Remove global offset, but keep trajectory in first position
                     positions_3d.append(pos_3d)
                 self._data_3d[subject][action_name] = {'positions': positions, 'cameras': self._cameras[subject], 'positions_3d': positions_3d}
 
