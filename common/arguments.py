@@ -87,6 +87,7 @@ def parse_args():
     parser.set_defaults(bone_length_term=True)
     parser.set_defaults(data_augmentation=True)
     parser.set_defaults(test_time_augmentation=True)
+    parser.set_defaults(by_subject=True)
 
     args = parser.parse_args()
     # Check invalid configuration
