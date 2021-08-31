@@ -6,7 +6,7 @@
 #
 
 import numpy as np
-import copy
+import copy,json
 from common.skeleton import Skeleton
 from common.mocap_dataset import MocapDataset
 from common.camera import normalize_screen_coordinates, image_coordinates, world_to_camera
@@ -297,16 +297,16 @@ class Human36mDataset(MocapDataset):
         self.pad = pad
         self.causal_shift = causal_shift
         self.is_train = is_train
-        self.train_subjects = ["S1", "S2", "S5", "S6", "S7", "S8"]
-        self.test_subjects = ["S9", "S11"]
-
-        self._cameras = copy.deepcopy(h36m_cameras_extrinsic_params)
+        self.train_subjects = ["S1", "S2", "S5", "S6", "S7", "S8", "setting1", "setting10_1", "setting10_2", "setting2", "setting4","setting6", "setting7_1", "setting7_2", "setting8_1", "setting8_2", "setting9_1", "setting9_2"]
+        self.test_subjects = ["S9", "S11", "setting3", "setting5"]
+        cam_params = json.load(open("data/cam_all.json"))
+        self._cameras = copy.deepcopy(cam_params)
         for sub,cameras in self._cameras.items():
             for i, cam in enumerate(cameras):
-                if sub == "S2":
-                    cam.update(h36m_goProCameras_intrinsic_params[i])
-                else:
-                    cam.update(h36m_cameras_intrinsic_params[i])
+                # if sub == "S2":
+                #     cam.update(h36m_goProCameras_intrinsic_params[i])
+                # else:
+                #     cam.update(h36m_cameras_intrinsic_params[i])
                 for k, v in cam.items():
                     if k not in ['id', 'res_w', 'res_h']:
                         cam[k] = np.array(v, dtype='float32')
