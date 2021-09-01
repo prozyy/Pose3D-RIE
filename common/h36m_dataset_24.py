@@ -297,7 +297,7 @@ class Human36mDataset(MocapDataset):
         self.pad = pad
         self.causal_shift = causal_shift
         self.is_train = is_train
-        self.train_subjects = ["S1", "S2", "S5", "S6", "S7", "S8", "setting1", "setting10_1", "setting10_2", "setting2", "setting4","setting6", "setting7_1", "setting7_2", "setting8_1", "setting8_2", "setting9_1", "setting9_2"]
+        self.train_subjects = ["S1", "S2", "S5", "S6", "S7", "S8", "setting1", "setting101", "setting102", "setting2", "setting4","setting6", "setting71", "setting72", "setting81", "setting82", "setting91", "setting92"]
         self.test_subjects = ["S9", "S11", "setting3", "setting5"]
         cam_params = json.load(open("data/cam_all.json"))
         self._cameras = copy.deepcopy(cam_params)
@@ -411,8 +411,15 @@ class Human36mDataset(MocapDataset):
     def getDataFromPair(self, index):
 
         subject_action_camIndex, start_3d, end_3d, flip = self._pairs[index]
+        str_split_list = subject_action_camIndex.split("_")
+        if len(str_split_list) == 3:
+            subject, action, camIndex = str_split_list
+        elif len(str_split_list) >= 4:
+            subject = str_split_list[0]
+            camIndex = str_split_list[-1]
+            action = "_".join(str_split_list[1:-1])
+        # print("subject:",subject," action:",action," camIndex:",camIndex)
 
-        subject, action, camIndex = subject_action_camIndex.split("_")
         seq_2d = self._data_2d[subject][action][int(camIndex)]
 
         start_2d = start_3d - self.pad - self.causal_shift
