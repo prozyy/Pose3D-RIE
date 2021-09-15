@@ -10,6 +10,8 @@ import copy,json
 from common.skeleton import Skeleton
 from common.mocap_dataset import MocapDataset
 from common.camera import normalize_screen_coordinates, image_coordinates, world_to_camera
+import time,os
+import pickle
 
 h36m_skeleton = Skeleton(parents=[-1,  0,  0,  1,  2,  6,  5,  5,  6,  7,  8,  5, 6, 11, 12, 13, 14, 15, 16, 15, 16, 0, 9, 10],
        joints_left=[1,3,5,7,9,11,13,15,17,19,22],
@@ -299,7 +301,7 @@ class Human36mDataset(MocapDataset):
         self.is_train = is_train
         self.train_subjects = ["S1", "S2", "S5", "S6", "S7", "S8", "setting1", "setting101", "setting102", "setting2", "setting4","setting6", "setting71", "setting72", "setting81", "setting82", "setting91", "setting92"]
         self.test_subjects = ["S9", "S11", "setting3", "setting5"]
-        cam_params = json.load(open("data/cam_all.json"))
+        cam_params = json.load(open("data/cam_all_z+.json"))
         self._cameras = copy.deepcopy(cam_params)
         for sub,cameras in self._cameras.items():
             for i, cam in enumerate(cameras):
@@ -336,7 +338,13 @@ class Human36mDataset(MocapDataset):
         keypoints_symmetry = data2d_file['metadata'].item()['keypoints_symmetry']
         self.kps_left, self.kps_right = list(keypoints_symmetry[0]), list(keypoints_symmetry[1])
 
-        self.process3DPose()
+        # self.process3DPose()
+        if os.path.exists(path3d.replace(".npz",".pkl")):
+            with open(path3d.replace(".npz",".pkl"), 'rb') as handle:
+                self._data_3d = pickle.load(handle)
+        else:
+            self.process3DPose()
+
         self.normalize2DPose()
         # self._pairs = self._data_2d["S1"]["Directions"][0]
         self.getPairs()
