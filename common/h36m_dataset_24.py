@@ -66,7 +66,7 @@ class Human36mDataset(MocapDataset):
         else:
             self.process3DPose()
             with open(path3d.replace(".npz",".pkl"), 'wb') as handle:
-                self._data_3d = pickle.dump(self._data_3d,handle)
+                pickle.dump(self._data_3d,handle)
 
         self.normalize2DPose()
         self.getPairs()
