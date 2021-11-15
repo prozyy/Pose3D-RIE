@@ -36,8 +36,8 @@ class Human36mDataset(MocapDataset):
                         cam[k] = np.array(v, dtype='float32')
 
                 # Normalize camera frame
-                cam['center'] = normalize_screen_coordinates(cam['center'], w=cam['res_w'], h=cam['res_h']).astype('float32')
-                cam['focal_length'] = cam['focal_length'] / cam['res_w'] * 2
+                # cam['center'] = normalize_screen_coordinates(cam['center'], w=cam['res_w'], h=cam['res_h']).astype('float32')
+                # cam['focal_length'] = cam['focal_length'] / cam['res_w'] * 2
                 if 'translation' in cam:
                     cam['translation'] = cam['translation'] / 1000  # mm to meters
 
@@ -112,7 +112,7 @@ class Human36mDataset(MocapDataset):
 
                     cam = self._cameras[subject][cam_idx]
                     kps = self._data_2d[subject][action][cam_idx]
-                    kps[..., :2] = normalize_screen_coordinates(kps[..., :2], w=cam['res_w'], h=cam['res_h'])
+                    kps[..., :2] = normalize_screen_coordinates(kps[..., :2], cx=cam['center'][0], cy=cam['center'][1],fx = cam["focal_length"][0],fy = cam["focal_length"][1])
                     self._data_2d[subject][action][cam_idx] = kps
                 assert len(self._data_2d[subject][action]) == len(self._data_3d[subject][action]['positions_3d'])
 
